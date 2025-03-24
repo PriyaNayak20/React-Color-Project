@@ -1,7 +1,5 @@
 import React from 'react'
 
-const Palettes = () => {
+export const Palettes = () => {
   return <div>Palettes</div>
 }
-
-export default Palettes
