@@ -1,16 +1,35 @@
-import React from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import Home from './pages/Home'
-import './index.css'
+import styled from 'styled-components'
+import bg from './bg.png'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import Palettes from './components/Palettes'
+import Palette from './components/Palette'
 
-const App: React.FC = () => {
+// Define the prop types for styled component
+interface AppStyledProps {
+  bg: string
+}
+
+function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-      </Routes>
-    </Router>
+    <BrowserRouter>
+      <AppStyled bg={bg}>
+        <Routes>
+          <Route path="/" element={<Palettes />} />
+          <Route path="/palette/:id" element={<Palette />} />
+        </Routes>
+      </AppStyled>
+    </BrowserRouter>
   )
 }
+
+const AppStyled = styled.div<AppStyledProps>`
+  min-height: 100vh;
+  background-color: slateblue;
+  background-image: ${({ bg }) => `url(${bg})`};
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+`
 
 export default App
