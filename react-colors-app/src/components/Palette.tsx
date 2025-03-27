@@ -12,20 +12,7 @@ import {
 import { palette } from '../MyPalette'
 
 const del = <i className="fa-sharp fa-solid fa-trash"></i>
-const brush = <i className="fa-solid fa-brush"></i>
 const paletteIcon = <i className="fa-solid fa-palette"></i>
-
-const copyTexts = [
-  'Paste Me!',
-  'Copied!',
-  'Oh Paste Me',
-  'Already Copied!',
-  'Nice!',
-  'Okay!',
-  'Done!',
-  'Good Choice!',
-  'Right One!',
-]
 
 function Palette() {
   const { id } = useParams<{ id: string }>()
@@ -105,15 +92,6 @@ function Palette() {
     dispatch(updatePaletteColors({ id, colors: newColors }))
   }
 
-  const clear = () => {
-    if (!id) return
-    dispatch(updatePaletteColors({ id, colors: [] }))
-  }
-
-  const generateRandomText = () => {
-    return copyTexts[Math.floor(Math.random() * copyTexts.length)]
-  }
-
   if (!myPalette) return null
 
   return (
@@ -134,9 +112,7 @@ function Palette() {
             className="btn-icon"
           >
             {paletteIcon}
-          </button>
-          <button className="btn-icon" onClick={clear}>
-            {brush}
+            <span>Add Color</span>
           </button>
         </div>
       </div>
@@ -149,7 +125,8 @@ function Palette() {
               width="400px"
             />
             <button className="btn-icon" onClick={createColor}>
-              <i className="fa-solid fa-plus"></i> Add
+              <i className="fa-solid fa-plus"></i>
+              <span>Add Color</span>
             </button>
           </div>
           <div
@@ -182,7 +159,7 @@ function Palette() {
           style={{ backgroundColor: currentColor }}
         >
           <div className="text">
-            <h3>{generateRandomText()}</h3>
+            <h3>Copied!</h3>
           </div>
         </div>
       )}
@@ -208,8 +185,16 @@ const PaletteStyled = styled.div`
     color: white;
     background: #a855f7;
     transition: all 0.3s ease-in-out;
+    gap: 0.5rem;
     &:hover {
       background: #0d0b33;
+    }
+    i {
+      font-size: 1.2rem;
+    }
+    span {
+      font-size: 1rem;
+      font-weight: 500;
     }
   }
   .header-items {
