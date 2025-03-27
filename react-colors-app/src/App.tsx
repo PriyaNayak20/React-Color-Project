@@ -1,7 +1,8 @@
 import styled from 'styled-components'
-import bg from './bg.png'
+import bg from './components/bg.png'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Palette from './components/Palette'
+import Palettes from './components/Palettes'
 
 interface AppStyledProps {
   bg: string
@@ -12,6 +13,7 @@ function App() {
     <BrowserRouter>
       <AppStyled bg={bg}>
         <Routes>
+          <Route path="/" element={<Palettes />} />
           <Route path="/palette/:id" element={<Palette />} />
         </Routes>
       </AppStyled>
