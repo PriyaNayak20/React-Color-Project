@@ -221,7 +221,7 @@ const PalettesStyled = styled.div`
       font-size: 1.5rem;
       padding-top: 0.5rem;
       display: inline-block;
-      background: linear-gradient(90deg, #7263f3 20%, #f56692 50%, #6fcf97 60%);
+      background: linear-gradient(90deg,rgb(12, 210, 108) 20%, #f56692 50%, #6fcf97 60%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
