@@ -11,7 +11,7 @@ import {
 } from '../store/paletteSlice'
 import { palette } from '../MyPalette'
 
-const del = <i className="fa-sharp fa-solid fa-trash"></i>
+const del = <i className="fas fa-trash-alt"></i>
 const paletteIcon = <i className="fa-solid fa-palette"></i>
 
 function Palette() {
@@ -147,7 +147,13 @@ function Palette() {
             }}
           >
             <h4>{colorFormat === 'hex' ? color : convertToRGB(color)}</h4>
-            <button className="btn-icon" onClick={() => deleteColor(index)}>
+            <button
+              className="btn-icon"
+              onClick={(e) => {
+                e.stopPropagation()
+                deleteColor(index)
+              }}
+            >
               {del}
             </button>
           </div>
@@ -247,6 +253,7 @@ const PaletteStyled = styled.div`
     transform: scale(0);
     transition: all 0.3s ease-in-out;
     animation: show 0.3s ease-in-out forwards;
+    z-index: 999;
     .text {
       background: rgba(255, 255, 255, 0.26);
       padding: 2rem 6rem;
@@ -297,15 +304,30 @@ const PaletteStyled = styled.div`
       button {
         position: absolute;
         right: 0;
-        bottom: 0px;
-        border-bottom-left-radius: 0;
+        bottom: 0;
+        border-bottom-left-radius: 7px;
         border-top-right-radius: 0;
         border-bottom-right-radius: 0;
-        padding: 0.3rem 0.4rem;
-        font-size: 1.1rem;
+        padding: 0.8rem;
+        font-size: 1.3rem;
         color: #fff;
-        background: transparent;
-        filter: drop-shadow(0 3px 0.3rem rgba(0, 0, 0, 0.4));
+        background: rgba(255, 0, 0, 0.5);
+        cursor: pointer;
+        z-index: 10;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        outline: none;
+        &:hover {
+          background: rgba(255, 0, 0, 0.8);
+          transform: scale(1.1);
+        }
+        i {
+          font-size: 1.2rem;
+          color: white;
+        }
       }
     }
   }
