@@ -59,7 +59,7 @@ function Palette() {
     try {
       const chromaColor = chroma(color)
       const hsl = chromaColor.hsl()
-      const lightness = (level / 1000) * 100 // Convert level (0-1000) to percentage (0-100)
+      const lightness = ((1000 - level) / 1000) * 100 // Convert level (0-1000) to percentage (0-100)
       return chroma.hsl(hsl[0], hsl[1], lightness / 100).hex()
     } catch (e) {
       return color
@@ -176,7 +176,11 @@ function Palette() {
                 handleFullColorClick(shadedColor)
               }}
             >
-              <h4>{colorFormat === 'hex' ? shadedColor : convertToRGB(shadedColor)}</h4>
+              <h4>
+                {colorFormat === 'hex'
+                  ? shadedColor
+                  : convertToRGB(shadedColor)}
+              </h4>
               <button
                 className="btn-icon"
                 onClick={(e) => {
@@ -245,24 +249,24 @@ const PaletteStyled = styled.div`
       display: flex;
       align-items: center;
       gap: 2rem;
-      
+
       .level-slider {
         display: flex;
         align-items: center;
         gap: 1rem;
-        
+
         span {
           font-weight: 500;
         }
-        
-        input[type="range"] {
+
+        input[type='range'] {
           width: 200px;
           height: 8px;
           -webkit-appearance: none;
           background: #ddd;
           border-radius: 5px;
           outline: none;
-          
+
           &::-webkit-slider-thumb {
             -webkit-appearance: none;
             width: 18px;
@@ -271,7 +275,7 @@ const PaletteStyled = styled.div`
             border-radius: 50%;
             cursor: pointer;
           }
-          
+
           &::-moz-range-thumb {
             width: 18px;
             height: 18px;
