@@ -8,8 +8,10 @@ import {
   setPalette,
   updatePaletteColors,
   setColorFormat,
+  setLevel,
 } from '../store/paletteSlice'
 import { palette } from '../MyPalette'
+import chroma from 'chroma-js'
 
 const del = <i className="fas fa-trash-alt"></i>
 const paletteIcon = <i className="fa-solid fa-palette"></i>
@@ -17,7 +19,7 @@ const paletteIcon = <i className="fa-solid fa-palette"></i>
 function Palette() {
   const { id } = useParams<{ id: string }>()
   const dispatch = useDispatch()
-  const { palettes, colorFormat } = useSelector(
+  const { palettes, colorFormat, level } = useSelector(
     (state: RootState) => state.palette
   )
 
@@ -47,6 +49,21 @@ function Palette() {
 
   const toggleToRgb = (e: React.ChangeEvent<HTMLSelectElement>) => {
     dispatch(setColorFormat(e.target.value as 'hex' | 'rgb'))
+  }
+
+  const handleLevelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch(setLevel(Number(e.target.value)))
+  }
+
+  const getColorShade = (color: string): string => {
+    try {
+      const chromaColor = chroma(color)
+      const hsl = chromaColor.hsl()
+      const lightness = (level / 1000) * 100 // Convert level (0-1000) to percentage (0-100)
+      return chroma.hsl(hsl[0], hsl[1], lightness / 100).hex()
+    } catch (e) {
+      return color
+    }
   }
 
   const convertToRGB = (hex: string): string => {
@@ -99,6 +116,17 @@ function Palette() {
       <div className="header-items">
         <div className="link-con">
           <Link to={'/'}>&larr;&nbsp; Back</Link>
+          <div className="level-slider">
+            <span>Level: {level}</span>
+            <input
+              type="range"
+              min="100"
+              max="900"
+              step="100"
+              value={level}
+              onChange={handleLevelChange}
+            />
+          </div>
         </div>
         <div className="select-type">
           <select value={colorFormat} onChange={toggleToRgb}>
@@ -136,28 +164,31 @@ function Palette() {
         </div>
       )}
       <div className="colors">
-        {myPalette.colors.map((color, index) => (
-          <div
-            key={index}
-            style={{ background: color }}
-            className="full-color"
-            onClick={(e) => {
-              handleCopyToClipboard(e)
-              handleFullColorClick(e.currentTarget.style.backgroundColor)
-            }}
-          >
-            <h4>{colorFormat === 'hex' ? color : convertToRGB(color)}</h4>
-            <button
-              className="btn-icon"
+        {myPalette.colors.map((color, index) => {
+          const shadedColor = getColorShade(color)
+          return (
+            <div
+              key={index}
+              style={{ background: shadedColor }}
+              className="full-color"
               onClick={(e) => {
-                e.stopPropagation()
-                deleteColor(index)
+                handleCopyToClipboard(e)
+                handleFullColorClick(shadedColor)
               }}
             >
-              {del}
-            </button>
-          </div>
-        ))}
+              <h4>{colorFormat === 'hex' ? shadedColor : convertToRGB(shadedColor)}</h4>
+              <button
+                className="btn-icon"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  deleteColor(index)
+                }}
+              >
+                {del}
+              </button>
+            </div>
+          )
+        })}
       </div>
       {currentColor && (
         <div
@@ -211,6 +242,46 @@ const PaletteStyled = styled.div`
     padding: 0 2rem;
     background-color: #fff;
     .link-con {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      
+      .level-slider {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        
+        span {
+          font-weight: 500;
+        }
+        
+        input[type="range"] {
+          width: 200px;
+          height: 8px;
+          -webkit-appearance: none;
+          background: #ddd;
+          border-radius: 5px;
+          outline: none;
+          
+          &::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #a855f7;
+            border-radius: 50%;
+            cursor: pointer;
+          }
+          
+          &::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: #a855f7;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+          }
+        }
+      }
       a {
         text-decoration: none;
         font-family: inherit;

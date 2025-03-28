@@ -10,12 +10,14 @@ interface PaletteState {
   palettes: { [key: string]: ColorPalette }
   colorFormat: 'hex' | 'rgb'
   palettesList: ColorPalette[]
+  level: number
 }
 
 const initialState: PaletteState = {
   palettes: {},
   colorFormat: 'hex',
   palettesList: [],
+  level: 500
 }
 
 const paletteSlice = createSlice({
@@ -46,6 +48,9 @@ const paletteSlice = createSlice({
       state.palettesList.push(action.payload)
       state.palettes[action.payload.name] = action.payload
     },
+    setLevel: (state, action: PayloadAction<number>) => {
+      state.level = action.payload
+    }
   },
 })
 
@@ -55,5 +60,6 @@ export const {
   setColorFormat,
   setPalettesList,
   addPalette,
+  setLevel,
 } = paletteSlice.actions
 export default paletteSlice.reducer
