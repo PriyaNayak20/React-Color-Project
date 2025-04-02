@@ -14,55 +14,54 @@ interface ColorPalette {
   colors: string[]
 }
 
+const getPaletteFromLocalStorage = (key: string): ColorPalette | null => {
+  const savedPalette = localStorage.getItem(key)
+  console.log(savedPalette, 'savedPalattes1223')
+  return savedPalette ? JSON.parse(savedPalette) : null
+}
+
+const savePaletteToLocalStorage = (palette: ColorPalette) => {
+  const key = `myPalette-${palette.name}`
+  if (!localStorage.getItem(key)) {
+    localStorage.setItem(key, JSON.stringify(palette))
+  }
+}
+
+const generateRandomColors = (): string[] => {
+  const colors: string[] = []
+  while (colors.length < 19) {
+    const color = chroma.random().hex()
+    if (chroma.valid(color)) {
+      colors.push(color)
+    }
+  }
+  return colors
+}
+
 function Palettes() {
   const dispatch = useDispatch()
   const { palettesList } = useSelector((state: RootState) => state.palette)
   const [paletteName, setPaletteName] = useState('')
 
-  // Add initial palettes to localStorage
   useEffect(() => {
-    palette.forEach((pal) => {
-      const savedPalette = localStorage.getItem(`myPalette-${pal.name}`)
-      if (!savedPalette) {
-        localStorage.setItem(`myPalette-${pal.name}`, JSON.stringify(pal))
-      }
-    })
+    palette.forEach(savePaletteToLocalStorage)
   }, [])
 
-  // Load palettes from localStorage
   useEffect(() => {
     const palettes: ColorPalette[] = []
-
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i)
       if (key?.startsWith('myPalette-')) {
-        const savedPalette = localStorage.getItem(key)
+        const savedPalette = getPaletteFromLocalStorage(key)
         if (savedPalette) {
-          palettes.push(JSON.parse(savedPalette))
+          palettes.push(savedPalette)
         }
       }
     }
-
-    // Sort the items by created date
     palettes.sort((a, b) => a.createdAt - b.createdAt)
     dispatch(setPalettesList(palettes))
   }, [dispatch])
 
-  // Generate 20 random colors
-  const generateRandomColors = (): string[] => {
-    const colors: string[] = []
-
-    while (colors.length < 20) {
-      const color = chroma.random().hex()
-      if (chroma.valid(color)) {
-        colors.push(color)
-      }
-    }
-
-    return colors
-  }
-
-  // Create a palette
   const addPaletteHandler = () => {
     if (!paletteName.trim()) return
 
@@ -72,15 +71,9 @@ function Palettes() {
       colors: generateRandomColors(),
     }
 
-    // Check if it exists in localStorage
-    const key = `myPalette-${newPalette.name}`
-    const savedPalette = localStorage.getItem(key)
-    if (savedPalette) {
-      return
-    }
+    if (getPaletteFromLocalStorage(`myPalette-${newPalette.name}`)) return
 
-    // Add to localStorage if palette doesn't exist
-    localStorage.setItem(key, JSON.stringify(newPalette))
+    savePaletteToLocalStorage(newPalette)
     dispatch(addPalette(newPalette))
     setPaletteName('')
   }
@@ -242,5 +235,4 @@ const PalettesStyled = styled.div`
     }
   }
 `
-
 export default Palettes

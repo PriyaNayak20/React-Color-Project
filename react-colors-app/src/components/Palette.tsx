@@ -59,7 +59,7 @@ function Palette() {
     try {
       const chromaColor = chroma(color)
       const hsl = chromaColor.hsl()
-      const lightness = ((1000 - level) / 1000) * 100 // Convert level (0-1000) to percentage (0-100)
+      const lightness = ((1000 - level) / 1000) * 100
       return chroma.hsl(hsl[0], hsl[1], lightness / 100).hex()
     } catch (e) {
       return color
