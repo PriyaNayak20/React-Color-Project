@@ -14,6 +14,8 @@ interface ColorPalette {
   colors: string[]
 }
 
+const del = <i className="fas fa-trash-alt"></i>
+
 const getPaletteFromLocalStorage = (key: string): ColorPalette | null => {
   const savedPalette = localStorage.getItem(key)
   console.log(savedPalette, 'savedPalattes1223')
@@ -78,6 +80,14 @@ function Palettes() {
     setPaletteName('')
   }
 
+  const deletePaletteHandler = (paletteName: string) => {
+    localStorage.removeItem(`myPalette-${paletteName}`)
+    const updatedPalettes = palettesList.filter(
+      (pal) => pal.name !== paletteName
+    )
+    dispatch(setPalettesList(updatedPalettes))
+  }
+
   return (
     <PalettesStyled>
       <div className="add-palette">
@@ -105,6 +115,18 @@ function Palettes() {
               ))}
             </div>
             <p>{pal.name}</p>
+            <div className="palette-container">
+              <button
+                className="btn-icon"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  deletePaletteHandler(pal.name)
+                }}
+              >
+                {del}
+              </button>
+            </div>
           </Link>
         ))}
       </div>
@@ -231,6 +253,27 @@ const PalettesStyled = styled.div`
       .color {
         width: 100%;
         height: 100%;
+      }
+    }
+    .btn-icon {
+      background: none;
+      border: none;
+      color: #ff4d4d; /* Red color for delete button */
+      font-size: 1.3rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: right;
+      justify-content: flex-end;
+      margin-left: auto;
+
+      &:hover {
+        color: #d93636; /* Darker red on hover */
+        transform: scale(1.1); /* Slight zoom effect */
+      }
+
+      &:focus {
+        outline: none;
       }
     }
   }
