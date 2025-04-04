@@ -84,6 +84,15 @@ const CreatePalette: React.FC = () => {
     navigate('/')
   }
 
+  const handleDeleteColor = (colorToDelete: string) => {
+    console.log('Deleting color:', colorToDelete)
+    setColors((prevColors) => {
+      const newColors = prevColors.filter((color) => color !== colorToDelete)
+      console.log('New colors:', newColors)
+      return newColors
+    })
+  }
+
   return (
     <CreatePaletteStyled>
       <header>
@@ -125,7 +134,11 @@ const CreatePalette: React.FC = () => {
             <SortableContext items={colors} strategy={rectSortingStrategy}>
               <div className="colors-grid">
                 {colors.map((color) => (
-                  <SortableColor key={color} color={color} />
+                  <SortableColor
+                    key={color}
+                    color={color}
+                    onDelete={handleDeleteColor}
+                  />
                 ))}
               </div>
             </SortableContext>
