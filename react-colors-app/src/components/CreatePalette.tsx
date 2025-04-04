@@ -20,7 +20,7 @@ import { ChromePicker } from 'react-color'
 import chroma from 'chroma-js'
 import slugify from 'react-slugify'
 
-const generateRandomColors = (count: number = 19): string[] => {
+const generateRandomColors = (count: number = 10): string[] => {
   const colors: string[] = []
   while (colors.length < count) {
     const color = chroma.random().hex()
