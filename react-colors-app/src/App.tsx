@@ -3,6 +3,8 @@ import bg from './components/bg.png'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Palette from './components/Palette'
 import Palettes from './components/Palettes'
+import ShadesPage from './ShadesPage'
+import CreatePalette from './components/CreatePalette'
 
 interface AppStyledProps {
   bg: string
@@ -15,6 +17,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Palettes />} />
           <Route path="/palette/:id" element={<Palette />} />
+          <Route path="shades/:id" element={<ShadesPage />} />
+          <Route path="/create-palette" element={<CreatePalette />} />
         </Routes>
       </AppStyled>
     </BrowserRouter>

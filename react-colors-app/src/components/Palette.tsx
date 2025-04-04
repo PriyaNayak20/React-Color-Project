@@ -1,51 +1,42 @@
 import React, { useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import styled from 'styled-components'
-import { SketchPicker } from 'react-color'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../store/store'
-import {
-  setPalette,
-  updatePaletteColors,
-  setColorFormat,
-  setLevel,
-} from '../store/paletteSlice'
+import { useNavigate } from 'react-router-dom'
+import { setPalette, setColorFormat, setLevel } from '../store/paletteSlice'
 import { palette } from '../MyPalette'
 import chroma from 'chroma-js'
 
-const del = <i className="fas fa-trash-alt"></i>
-const paletteIcon = <i className="fa-solid fa-palette"></i>
+const moreColorBtn = <i className="fa-regular fa-square-caret-down fa-beat"></i>
 
 function Palette() {
-  const { id } = useParams<{ id: string }>()
+  const { id = '' } = useParams<{ id: string }>()
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const { palettes, colorFormat, level } = useSelector(
     (state: RootState) => state.palette
   )
 
-  const initialPalette = palette.find((pal) => pal.name === id)
-  const myPalette = palettes[id || ''] || initialPalette
-
-  const [toggleColorPicker, setToggleColorPicker] = React.useState(false)
-  const [colorPickerColor, setColorPickerColor] = React.useState('#fff')
   const [currentColor, setCurrentColor] = React.useState('')
+  const currentPalette = id ? palettes[id] : null
 
   useEffect(() => {
-    if (id && initialPalette) {
+    if (id) {
       const savedPalette = localStorage.getItem(`myPalette-${id}`)
       if (savedPalette) {
-        dispatch(setPalette({ id, palette: JSON.parse(savedPalette) }))
+        const parsedPalette = JSON.parse(savedPalette)
+        dispatch(setPalette({ id, palette: parsedPalette }))
       } else {
-        dispatch(setPalette({ id, palette: initialPalette }))
+        const initialPalette = palette.find((pal) => pal.name === id)
+        if (initialPalette) {
+          dispatch(setPalette({ id, palette: initialPalette }))
+        } else {
+          navigate('/')
+        }
       }
     }
-  }, [id, initialPalette, dispatch])
-
-  useEffect(() => {
-    if (id && myPalette) {
-      localStorage.setItem(`myPalette-${id}`, JSON.stringify(myPalette))
-    }
-  }, [myPalette, id])
+  }, [id, dispatch, navigate])
 
   const toggleToRgb = (e: React.ChangeEvent<HTMLSelectElement>) => {
     dispatch(setColorFormat(e.target.value as 'hex' | 'rgb'))
@@ -74,10 +65,6 @@ function Palette() {
     return `rgb(${r}, ${g}, ${b})`
   }
 
-  const handleColorChange = (color: any) => {
-    setColorPickerColor(color.hex)
-  }
-
   const handleFullColorClick = (color: string) => {
     setCurrentColor(color)
     setTimeout(() => {
@@ -85,31 +72,23 @@ function Palette() {
     }, 1300)
   }
 
-  const createColor = () => {
-    if (!colorPickerColor || !id) return
-
-    const newColors = [...myPalette.colors]
-    if (newColors.length < 20) {
-      newColors.push(colorPickerColor)
-      dispatch(updatePaletteColors({ id, colors: newColors }))
-    } else {
-      alert('You can only add 20 colors to a palette')
-    }
-  }
-
   const handleCopyToClipboard = (e: React.MouseEvent<HTMLDivElement>) => {
     const text = e.currentTarget.innerText
     navigator.clipboard.writeText(text)
   }
 
-  const deleteColor = (index: number) => {
-    if (!id) return
-    const newColors = [...myPalette.colors]
-    newColors.splice(index, 1)
-    dispatch(updatePaletteColors({ id, colors: newColors }))
+  const moreColor = (index: number) => {
+    if (!id || !currentPalette) return
+    const selectedColor = currentPalette.colors[index]
+    const generatedShades = chroma
+      .scale([selectedColor, '#ffffff'])
+      .mode('lab')
+      .colors(6)
+
+    navigate(`/shades/${id}`, { state: { shades: generatedShades } })
   }
 
-  if (!myPalette) return null
+  if (!currentPalette) return null
 
   return (
     <PaletteStyled>
@@ -134,37 +113,9 @@ function Palette() {
             <option value="rgb">RGB</option>
           </select>
         </div>
-        <div className="right">
-          <button
-            onClick={() => setToggleColorPicker(!toggleColorPicker)}
-            className="btn-icon"
-          >
-            {paletteIcon}
-            <span>Add Color</span>
-          </button>
-        </div>
       </div>
-      {toggleColorPicker && (
-        <div className="color-picker-con">
-          <div className="color-picker">
-            <SketchPicker
-              color={colorPickerColor}
-              onChange={handleColorChange}
-              width="400px"
-            />
-            <button className="btn-icon" onClick={createColor}>
-              <i className="fa-solid fa-plus"></i>
-              <span>Add Color</span>
-            </button>
-          </div>
-          <div
-            onClick={() => setToggleColorPicker(!toggleColorPicker)}
-            className="color-picker-overlay"
-          ></div>
-        </div>
-      )}
       <div className="colors">
-        {myPalette.colors.map((color, index) => {
+        {currentPalette.colors.map((color: string, index: number) => {
           const shadedColor = getColorShade(color)
           return (
             <div
@@ -185,10 +136,10 @@ function Palette() {
                 className="btn-icon"
                 onClick={(e) => {
                   e.stopPropagation()
-                  deleteColor(index)
+                  moreColor(index)
                 }}
               >
-                {del}
+                {moreColorBtn}
               </button>
             </div>
           )
@@ -307,14 +258,6 @@ const PaletteStyled = styled.div`
       background-color: #000;
       cursor: pointer;
     }
-    .right {
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      button:last-child {
-        background-color: red;
-      }
-    }
   }
   .current-color {
     position: fixed;
@@ -386,7 +329,7 @@ const PaletteStyled = styled.div`
         padding: 0.8rem;
         font-size: 1.3rem;
         color: #fff;
-        background: rgba(255, 0, 0, 0.5);
+        background: transparent;
         cursor: pointer;
         z-index: 10;
         transition: all 0.3s ease;
@@ -396,7 +339,7 @@ const PaletteStyled = styled.div`
         border: none;
         outline: none;
         &:hover {
-          background: rgba(255, 0, 0, 0.8);
+          background: transparent;
           transform: scale(1.1);
         }
         i {
@@ -404,35 +347,6 @@ const PaletteStyled = styled.div`
           color: white;
         }
       }
-    }
-  }
-
-  .color-picker-con {
-    .sketch-picker {
-      box-shadow: 3px 3px 15px rgba(0, 0, 0, 0.5) !important;
-    }
-    .color-picker {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 11;
-      button {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        box-shadow: 2px 2px 15px rgba(0, 0, 0, 0.5);
-      }
-    }
-
-    .color-picker-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.8);
-      z-index: 1;
     }
   }
 `

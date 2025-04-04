@@ -1,11 +1,9 @@
-import chroma from 'chroma-js'
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import slugify from 'react-slugify'
 import styled from 'styled-components'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../store/store'
-import { setPalettesList, addPalette } from '../store/paletteSlice'
+import { setPalettesList } from '../store/paletteSlice'
 import { palette } from '../MyPalette'
 
 interface ColorPalette {
@@ -18,7 +16,6 @@ const del = <i className="fas fa-trash-alt"></i>
 
 const getPaletteFromLocalStorage = (key: string): ColorPalette | null => {
   const savedPalette = localStorage.getItem(key)
-  console.log(savedPalette, 'savedPalattes1223')
   return savedPalette ? JSON.parse(savedPalette) : null
 }
 
@@ -29,21 +26,9 @@ const savePaletteToLocalStorage = (palette: ColorPalette) => {
   }
 }
 
-const generateRandomColors = (): string[] => {
-  const colors: string[] = []
-  while (colors.length < 19) {
-    const color = chroma.random().hex()
-    if (chroma.valid(color)) {
-      colors.push(color)
-    }
-  }
-  return colors
-}
-
 function Palettes() {
   const dispatch = useDispatch()
   const { palettesList } = useSelector((state: RootState) => state.palette)
-  const [paletteName, setPaletteName] = useState('')
 
   useEffect(() => {
     palette.forEach(savePaletteToLocalStorage)
@@ -64,22 +49,6 @@ function Palettes() {
     dispatch(setPalettesList(palettes))
   }, [dispatch])
 
-  const addPaletteHandler = () => {
-    if (!paletteName.trim()) return
-
-    const newPalette: ColorPalette = {
-      name: slugify(paletteName),
-      createdAt: new Date().getTime(),
-      colors: generateRandomColors(),
-    }
-
-    if (getPaletteFromLocalStorage(`myPalette-${newPalette.name}`)) return
-
-    savePaletteToLocalStorage(newPalette)
-    dispatch(addPalette(newPalette))
-    setPaletteName('')
-  }
-
   const deletePaletteHandler = (paletteName: string) => {
     localStorage.removeItem(`myPalette-${paletteName}`)
     const updatedPalettes = palettesList.filter(
@@ -91,16 +60,9 @@ function Palettes() {
   return (
     <PalettesStyled>
       <div className="add-palette">
-        <div className="input-control">
-          <input
-            required
-            placeholder="Create Palette..."
-            value={paletteName}
-            onChange={(e) => setPaletteName(e.target.value)}
-            type="text"
-          />
-          <button onClick={addPaletteHandler}>+</button>
-        </div>
+        <Link to="/create-palette" className="create-palette-btn">
+          Create New Palette
+        </Link>
       </div>
       <div className="palettes">
         {palettesList.map((pal) => (
@@ -138,77 +100,40 @@ const PalettesStyled = styled.div`
   position: relative;
   z-index: 5;
   .add-palette {
-    padding-left: 18rem;
-    padding-right: 18rem;
-    padding-top: 4rem;
-    padding-bottom: 2rem;
+    padding: 4rem 18rem 2rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 50%;
-    margin: 0 auto;
     transition: all 0.3s ease;
+
     @media screen and (max-width: 1670px) {
-      width: 70%;
-    }
-    @media screen and (max-width: 1320px) {
-      width: 90%;
+      padding: 4rem 10rem 2rem;
     }
     @media screen and (max-width: 970px) {
-      width: 100%;
-      padding-left: 10rem;
-      padding-right: 10rem;
+      padding: 4rem 5rem 2rem;
+    }
+    @media screen and (max-width: 600px) {
+      padding: 2rem 2rem 1.5rem;
     }
 
-    @media screen and (max-width: 600px) {
-      width: 100%;
-      padding-left: 4rem;
-      padding-right: 4rem;
-      padding-top: 2rem;
-      padding-bottom: 1.5rem;
-    }
-    input,
-    button {
-      font-family: inherit;
-      font-size: inherit;
-      outline: none;
-      border: none;
-    }
-    .input-control {
-      position: relative;
-      width: 100%;
-      box-shadow: 1px 4px 15px rgba(0, 0, 0, 0.12);
-      input {
-        width: 100%;
-        padding: 0.5rem 1rem;
-        border-radius: 7px;
-        &::placeholder {
-          color: #7263f3;
-          opacity: 0.3;
-        }
-      }
-      button {
-        position: absolute;
-        right: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        padding: 2px 1rem;
-        cursor: pointer;
-        font-size: 2rem;
-        height: 100%;
-        border-radius: 7px;
-        background-color: #7263f3;
-        color: white;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        &:hover {
-          background-color: #5a4ed1;
-        }
+    .create-palette-btn {
+      text-decoration: none;
+      padding: 1rem 2rem;
+      background: #7263f3;
+      color: white;
+      border-radius: 7px;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+
+      &:hover {
+        background: #5a4ed1;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
       }
     }
   }
+
   .palettes {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
@@ -258,7 +183,7 @@ const PalettesStyled = styled.div`
     .btn-icon {
       background: none;
       border: none;
-      color: #ff4d4d; /* Red color for delete button */
+      color: #ff4d4d;
       font-size: 1.3rem;
       cursor: pointer;
       transition: all 0.3s ease;
@@ -268,8 +193,8 @@ const PalettesStyled = styled.div`
       margin-left: auto;
 
       &:hover {
-        color: #d93636; /* Darker red on hover */
-        transform: scale(1.1); /* Slight zoom effect */
+        color: #d93636;
+        transform: scale(1.1);
       }
 
       &:focus {

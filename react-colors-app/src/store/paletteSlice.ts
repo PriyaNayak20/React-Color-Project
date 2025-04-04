@@ -17,7 +17,7 @@ const initialState: PaletteState = {
   palettes: {},
   colorFormat: 'hex',
   palettesList: [],
-  level: 500
+  level: 400,
 }
 
 const paletteSlice = createSlice({
@@ -50,7 +50,7 @@ const paletteSlice = createSlice({
     },
     setLevel: (state, action: PayloadAction<number>) => {
       state.level = action.payload
-    }
+    },
   },
 })
 

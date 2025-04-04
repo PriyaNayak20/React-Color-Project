@@ -55,7 +55,7 @@ const ShadesPageStyled = styled.div`
   }
   .shade {
     width: 700px;
-    height: 200px;
+    height: 150px;
     display: flex;
     align-items: center;
     justify-content: center;
